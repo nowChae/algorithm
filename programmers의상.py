@@ -1,3 +1,7 @@
+# 코딩테스트 연습 - 해시
+# Lv 2
+# 내 풀이
+
 from functools import reduce 
 
 def solution(clothes):
