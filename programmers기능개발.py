@@ -16,6 +16,7 @@ def solution(progresses, speeds):
     d_answer = 1
     answer = []
     
+    # max 값 갱신될 때 answer에 d_answer을 추가하고 반복 완료 후 마지막 d_answer 값 추가
     for d in pro_day[1:]:
         if d > d_max:
             d_max = d
