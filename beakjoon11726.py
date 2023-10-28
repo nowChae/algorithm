@@ -1,3 +1,7 @@
+# dp 문제 
+# 점화식 찾기
+# n번째에 두는 타일을 기준으로 점화식 구하기
+
 n = int(input())
 
 memo = [0 for _ in range(n+1)]
