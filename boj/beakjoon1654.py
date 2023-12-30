@@ -1,3 +1,5 @@
+#시간초과
+
 K, N = map(int,input().split())
 
 cable = []
