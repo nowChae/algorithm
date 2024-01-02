@@ -1,26 +1,26 @@
 def letter(word):
-    result = []
+    result = ''
     for w in word:
         o = ord(w)
         if o == 45 or o == 46 or o == 95:
-            result.append(w)
+            result += w
         elif 48 <= o and o <= 57:
-            result.append(w)
+            result += w
         elif 97 <= o and o <= 122:
-            result.append(w)
-    return ''.join(result)
+            result += w
+    return result
         
 def countDot(word):
-    result = []
+    result = ''
     for w in word:
         if w == '.':
             if len(result) == 0:
-                result.append(w)
+                result += w
                 continue
             elif result[-1] == '.':
                 continue
-        result.append(w)
-    return ''.join(result)
+        result += w
+    return result
 
 def firstLastDot(word):
     while word[0] == '.' or word[-1] == '.':
