@@ -1,46 +1,45 @@
-#DFS - stack, 재귀 함수를 이용해 구현 - 갈 수 있는 점까지 - 깊이 우선 탐색
-#BFS - queue를 이용해 구현 - 현재 정점이 연결된 가까운 점부터 - 너비 우선 탐색
-
 from collections import deque
+import sys
 
-point, line, start = map(int,input().split())
+node, edge, start = map(int,sys.stdin.readline().split())
 
-graph = [[] for x in range(point + 1) ]
+graph = [[False]*node for i in range(node)]
 
-for _ in range(line):
-  a, b = map(int, input().split())
-  graph[a].append(b)
-  graph[b].append(a)
+for i in range(edge):
+  node1, node2 = map(int, sys.stdin.readline().split())
+  graph[node1-1][node2-1] = True
+  graph[node2-1][node1-1] = True
 
-for g in graph:
-  g.sort()
-
-visited_d = [False] * len(graph)
-def DFS(graph, v, visited):
-  visited[v] = True
-  print(v, end=' ')
-
-  for i in graph[v]:
-    if not visited[i]:
-      DFS(graph, i, visited)
+visited_d = [False]*node
+visited_b = [False]*node
 
 
+# 재귀를 이용해 구현
+def dfs(start, visited, graph):
+  visited[start-1] = True
+  print(start, end=" ")
 
-visited_b = [False] * len(graph)
-def BFS(graph, start, visited):
+  for n in range(node):
+    if (not visited[n]) and (graph[start-1][n]):
+      dfs(n+1, visited, graph)
+
+dfs(start, visited_d, graph)
+
+# 큐를 이용해 구현
+def bfs(start, visited, graph):
   queue = deque([start])
+  visited[start-1] = True
 
-  visited[start] = True
   while queue:
     v = queue.popleft()
-    print(v, end=' ')
+    print(v, end=" ")
 
-    for i in graph[v]:
-      if not visited[i]:
-        queue.append(i)
-        visited[i] = True
+    for n in range(node):
+      if (not visited[n]) and (graph[v-1][n]):
+        queue.append(n+1)
+        visited[n] = True
+    
 
-        
-DFS(graph, start, visited_d)
 print()
-BFS(graph, start, visited_b)
+bfs(start, visited_b, graph)
+
