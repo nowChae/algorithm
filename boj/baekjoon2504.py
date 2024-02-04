@@ -7,13 +7,10 @@ state = True
 
 for s in string:
     if state:
+        sum = 0
         if s == '(':
             stack.append('(')
         elif s == ')':
-            if len(stack) == 0:
-                state = False
-                break
-            sum = 0
             while True:
                 if len(stack) == 0:
                     state = False
@@ -34,10 +31,6 @@ for s in string:
         elif s == '[':
             stack.append('[')
         elif s == ']':
-            if len(stack) == 0:
-                state = False
-                break
-            sum = 0
             while True:
                 if len(stack) == 0:
                     state = False
