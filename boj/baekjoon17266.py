@@ -1,3 +1,5 @@
+#이분 탐색 사용 X
+
 import sys
 input= sys.stdin.readline
 
