@@ -66,4 +66,4 @@ for i in range(M):
         result_w.append(find_power('W',i, j, 0 )**2)
         result_b.append(find_power('B', i, j, 0)**2)
 
-print(sum(result_w), sum(result_b))ㅅ
+print(sum(result_w), sum(result_b))
