@@ -1,28 +1,21 @@
-from collections import deque
+#dfs
 import sys
 input = sys.stdin.readline
 
-
-A, B = map(int,input().split())
+A, B = map(int, input().split())
 
 result = []
-def bfs(start, end):
-    queue_list = [start, 1]
-    queue = deque(queue_list)
+def dfs(start, end, count):
+    if start == end:
+        result.append(count)
+        return
+    elif start < end:
+        dfs(start*2, end, count+1)
+        dfs(start*10 + 1, end, count+1)
 
-    while queue:
-        s = queue.popleft()
-        cnt = queue.popleft()
-        if s == end:
-            result.append(cnt)
-        elif s < end:
-            cnt += 1
-            queue.append(s*2)
-            queue.append(cnt)
-            queue.append(s*10 + 1)
-            queue.append(cnt)
+    return 
+dfs(A, B, 1)
 
-bfs(A, B)
 if len(result) == 0:
     print(-1)
 else:
