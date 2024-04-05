@@ -18,16 +18,16 @@ def bfs(n, k, time):
 
         if qn == k:
             result_time.append(qt)
-        
-        if qn-1 >= 0 and not visited[qn-1]:
-            queue.append(qn-1)
-            queue.append(qt+1)
-        if qn+1 <=100000 and not visited[qn+1]:
-            queue.append(qn+1)
-            queue.append(qt+1)
+
         if qn*2 <=100000 and not visited[qn*2]:
             queue.append(qn*2)
             queue.append(qt)
+        if qn+1 <=100000 and not visited[qn+1]:
+            queue.append(qn+1)
+            queue.append(qt+1)
+        if qn-1 >= 0 and not visited[qn-1]:
+            queue.append(qn-1)
+            queue.append(qt+1)
 
 bfs(N, K, 0)
 print(min(result_time))
