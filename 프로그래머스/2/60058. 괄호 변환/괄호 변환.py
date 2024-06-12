@@ -1,27 +1,29 @@
 def solution(p):
     if good(p):
         return p
-    
     u, v = divide_uv(p)
     if good(u):
         return u + solution(v)
     else:
         return '(' + solution(v) + ')' + change(u[1:-1])
+    return p
 
 def divide_uv(p):
     open_cnt = 0
     close_cnt = 0
     
-    for i in range(len(p)):
-        if p[i] == '(':
+    cnt = 0
+    for q in p: 
+        if (open_cnt != 0) and (open_cnt == close_cnt):
+            return [p[:cnt], p[cnt:]]
+        if q == '(':
             open_cnt += 1
+            cnt += 1
         else:
             close_cnt += 1
-        if open_cnt == close_cnt:
-            return p[:i+1], p[i+1:]
-    
-    return p, ''
-
+            cnt += 1
+    return [p[:cnt], p[cnt:]]
+            
 def good(u):
     stack = []
     for ui in u:
@@ -30,9 +32,10 @@ def good(u):
         else:
             if len(stack) == 0:
                 return False
-            stack.pop()
-    return len(stack) == 0
-
+            else:
+                stack.pop()
+    return True
+    
 def change(u):
     result = ''
     for char in u:
