@@ -1,0 +1,28 @@
+# -*- coding: utf-8 -*-
+# UTF-8 encoding when using korean
+import sys
+input = sys.stdin.readline
+
+N = int(input())
+num_max = list(map(int, input().split()))
+num_default = list(map(int, input().split()))
+count = int(input())
+
+def max_det(idx, num_max, num_default):
+	if num_max[idx] < num_default[idx]:
+		num_default[idx] = 0
+		if idx == 0:
+			return 
+		num_default[idx-1] += 1
+		return 
+	return
+		
+
+while count:
+	num_default[N-1] += 1
+	for i in range(N-1, -1, -1):
+		max_det(i, num_max, num_default)
+	count -= 1
+
+for d in num_default:
+	print(d,end="")
