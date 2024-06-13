@@ -1,0 +1,10 @@
+# -*- coding: utf-8 -*-
+# UTF-8 encoding when using korean
+import sys
+import math
+input = sys.stdin.readline
+
+N, M = map(int, input().split(' '))
+result = (N*7)/(N+M)
+result = math.floor(result * 100) / 100
+print("{:.2f}".format(result))
