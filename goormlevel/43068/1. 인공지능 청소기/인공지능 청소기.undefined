@@ -1,0 +1,27 @@
+# -*- coding: utf-8 -*-
+# UTF-8 encoding when using korean
+import sys
+import math
+input = sys.stdin.readline
+
+testcase = int(input())
+
+def arrive_state(x, y, n):
+	total_distance = abs(0 - x) + abs(0 - y)
+	if total_distance > n:
+		return False
+	elif total_distance == n:
+		return True
+	else:
+		last = total_distance - n
+		if last % 2 == 0:
+			return True
+		else:
+			return False
+	
+for _ in range(testcase):
+	x, y, n = map(int,input().split(' '))
+	if arrive_state(x, y, n):
+		print("YES")
+	else:
+		print("NO")
