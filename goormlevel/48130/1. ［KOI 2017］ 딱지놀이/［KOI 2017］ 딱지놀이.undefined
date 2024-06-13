@@ -1,0 +1,35 @@
+# -*- coding: utf-8 -*-
+# UTF-8 encoding when using korean
+import sys
+input = sys.stdin.readline
+
+def count_card(card_list):
+	card_count = {4: 0, 3: 0, 2: 0, 1: 0}
+	for card in card_list:
+		card_count[card] += 1
+	return card_count
+	
+def game(a, b):
+	for i in range(4, 0, -1):
+		if a[i] > b[i]:
+			print('A')
+			return 
+		elif a[i] < b[i]:
+			print('B')
+			return 
+		else:
+			continue
+	print('D')
+	return
+
+N = int(input())
+
+for _ in range(N):
+	a_cnt, *a_list = map(int,input().split(' '))
+	b_cnt, *b_list = map(int,input().split(' '))
+	
+	a_dict = count_card(a_list)
+	b_dict = count_card(b_list)
+	game(a_dict, b_dict)
+print()
+	
