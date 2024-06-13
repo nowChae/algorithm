@@ -1,0 +1,22 @@
+# -*- coding: utf-8 -*-
+# UTF-8 encoding when using korean
+import sys
+input = sys.stdin.readline
+
+N, M = map(int, input().split(' '))
+houses = list(map(int,input().split(' ')))
+
+rain = []
+for i in range(1, M+1):
+	s, e = map(int,input().split(' '))
+	for j in range(s-1, e):
+		houses[j] += 1
+		if j not in rain:
+			rain.append(j)
+	
+	if i % 3 == 0:
+		for r in rain:
+			houses[r] -= 1
+		rain = []
+
+print(*houses)
