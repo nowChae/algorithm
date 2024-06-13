@@ -1,0 +1,65 @@
+# -*- coding: utf-8 -*-
+# UTF-8 encoding when using korean
+import sys
+input = sys.stdin.readline
+
+N = int(input())
+g_r, g_c = map(int,input().split())
+p_r, p_c = map(int,input().split())
+board = []
+for _ in range(N):
+	board.append(list(map(str, input().split())))
+	
+g_visited = [[False]*N for _ in range(N)]
+p_visited = [[False]*N for _ in range(N)]
+
+def game_start(board, visited, r, c):
+	result = 0
+	r -= 1
+	c -= 1
+	while not visited[r][c]:
+		visited[r][c] = True
+		result += 1
+		go = board[r][c]
+		
+		count = int(go[0:-1])
+		command = go[-1]
+		
+		while count > 0:
+			if command == 'L':
+				c -= 1
+				if c == -1:
+					c = N - 1
+			if command == 'R':
+				c += 1
+				if c == N:
+					c = 0
+			if command == 'U':
+				r -= 1
+				if r == -1:
+					r = N -1
+			if command == 'D':
+				r += 1
+				if r == N:
+					r = 0
+			
+			if visited[r][c]:
+				return result
+			else:
+				if count == 1: #도착한 칸에 대해 다시 전체 반복하기 위해 그냥 탈출 
+					break
+				else:
+					visited[r][c] = True
+					result += 1
+				
+			count -= 1
+		
+		
+	return result
+	
+g_result = game_start(board, g_visited, g_r, g_c)
+p_result = game_start(board, p_visited, p_r, p_c)
+if g_result > p_result:
+	print("goorm", g_result)
+else:
+	print("player", p_result)
