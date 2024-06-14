@@ -1,0 +1,60 @@
+# -*- coding: utf-8 -*-
+# UTF-8 encoding when using korean
+import sys
+import copy
+input = sys.stdin.readline
+
+N = int(input())
+park = []
+for _ in range(N):
+	park.append(list(map(int,input().split())))
+
+
+def range_state(r, c): # 범위 판단
+	if r < 0 or r >= N:
+		return False
+	if c < 0 or c >= N:
+		return False
+	return True
+
+def tree_state(r, c, park): # 해당 위치의 나무 상태가 0 이면 True
+	if park[r][c] == 0:
+		return True
+	else:
+		return False
+	
+def change_tree(park):
+	r_idx = [-1, 0, 1, 0]
+	c_idx = [0, 1, 0, -1]
+	
+	park_changed = copy.deepcopy(park) # 깊은 복사 
+	#park_changed = park[:]
+	for i in range(N):
+		for j in range(N):
+			count = 0
+			if park[i][j] != 0:
+				for k in range(4):
+					r = i + r_idx[k]
+					c = j + c_idx[k]
+					if range_state(r, c):
+						if tree_state(r, c, park):
+							count += 1
+				park_changed[i][j] -= count
+				if park_changed[i][j] < 0:
+					park_changed[i][j] = 0
+
+	return park_changed
+
+count = 0
+sum_park = 0
+for p in park:
+	sum_park += sum(p)
+while sum_park != 0:	
+	park = change_tree(park)
+	count += 1
+	sum_park = 0
+	for p in park:
+		sum_park += sum(p)
+	
+print(count)
+	
