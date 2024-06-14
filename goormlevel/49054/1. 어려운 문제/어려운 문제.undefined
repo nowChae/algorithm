@@ -1,0 +1,24 @@
+# -*- coding: utf-8 -*-
+# UTF-8 encoding when using korean
+import sys
+input = sys.stdin.readline
+import math
+
+N = int(input())
+"""
+def factorial(n):
+	if n == 0:
+		return 1
+	return n * factorial(n-1)
+
+"""
+def change(num_str):
+	while len(num_str) > 1:
+		rst = 0
+		for n in num_str:
+			rst += int(n)
+		num_str = str(rst)
+	return num_str
+
+num_str = str(math.factorial(N))
+print(change(num_str))
