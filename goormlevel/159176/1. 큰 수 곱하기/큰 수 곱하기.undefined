@@ -1,0 +1,10 @@
+# -*- coding: utf-8 -*-
+# UTF-8 encoding when using korean
+import sys
+input = sys.stdin.readline
+
+numbers = list(map(int,input().split()))
+answer = 1
+for n in numbers:
+	answer *= n
+print(answer)
