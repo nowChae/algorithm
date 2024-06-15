@@ -1,0 +1,21 @@
+# -*- coding: utf-8 -*-
+# UTF-8 encoding when using korean
+import sys
+input = sys.stdin.readline
+
+N = int(input())
+
+total = 0
+for _ in range(N):
+	state, money = map(str, input().split(' '))
+	if state == 'in':
+		total += int(money)
+	else:
+		total -= int(money)
+		if total < 0:
+			print("fail")
+			break
+		
+if total >= 0:
+	print("success")
+	
