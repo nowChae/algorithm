@@ -1,5 +1,4 @@
 import sys
-import math
 input = sys.stdin.readline
 
 T = int(input())
@@ -9,7 +8,6 @@ def level(slime):
     
     left = 1
     right = slime
-    middle = (left + right) // 2
 
     while left <= right:
         middle = (left + right) // 2
@@ -24,4 +22,3 @@ def level(slime):
 for _ in range(T):
     slime = int(input())
     print(level(slime))
-
