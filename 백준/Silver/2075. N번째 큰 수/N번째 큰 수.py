@@ -1,20 +1,20 @@
 import sys
-from heapq import heappush, heappop
-
+import heapq
 input = sys.stdin.readline
 
 N = int(input())
-min_heap = []
 
+heap = []
 for _ in range(N):
-   line = map(int, input().split())
+    nums = list(map(int,input().split(' ')))
+    if len(heap) < N:
+        for n in nums:
+            heapq.heappush(heap, n)
+    else:
+        for n in nums:
+            if heap[0] < n:
+                heapq.heappop(heap)
+                heapq.heappush(heap, n)
+        
+print(heapq.heappop(heap))
 
-   for num in line:
-      if len(min_heap) < N:
-         heappush(min_heap, num)  
-      else:
-         if num > min_heap[0]:  
-            heappop(min_heap)
-            heappush(min_heap, num)
-
-print(min_heap[0])
