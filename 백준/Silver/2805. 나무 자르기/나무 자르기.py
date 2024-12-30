@@ -12,10 +12,7 @@ right = max(tree)
 while left < right:
     middle = (left + right) // 2
 
-    tree_sum = 0
-    for t in tree:
-        if t - middle > 0:
-            tree_sum += t - middle
+    tree_sum = sum((t - middle) for t in tree if t > middle)
 
     if tree_sum == M:
         result = middle
