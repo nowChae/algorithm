@@ -1,24 +1,29 @@
-N, M = map(int, input().split())
-tree_list = list(map(int, input().split()))
+import sys
+input = sys.stdin.readline
 
-start, end = 0, max(tree_list) - 1
+N, M = map(int,input().split(' '))
+tree = list(map(int,input().split(' ')))
 
-result_list = []
-while start <= end:
-    mid = (start + end)//2
-    sum_of_tree = 0
-    for tree in tree_list:
-        tree_height = tree - mid
-        if (tree_height > 0): 
-            sum_of_tree += (tree_height)
-    
-    if sum_of_tree == M:
-        result_list.append(mid)
+result = 0 
+
+left = 0
+right = max(tree)
+
+while left < right:
+    middle = (left + right) // 2
+
+    tree_sum = 0
+    for t in tree:
+        if t - middle > 0:
+            tree_sum += t - middle
+
+    if tree_sum == M:
+        result = middle
         break
-    elif sum_of_tree < M:
-        end = mid - 1
+    elif tree_sum < M:
+        right = middle
     else:
-        start = mid + 1
-        result_list.append(mid)
+        result = middle
+        left = middle + 1
 
-print(max(result_list))
+print(result)
