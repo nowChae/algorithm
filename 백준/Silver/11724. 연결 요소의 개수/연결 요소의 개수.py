@@ -1,30 +1,28 @@
 import sys
-from collections import deque
 input = sys.stdin.readline
+sys.setrecursionlimit(10**6)
 
-N, M = map(int,input().split(' '))
-visited = [False] * (N+1)
+N, M =  map(int,input().split(' '))
 
-link = dict()
+visited = [False] * N
+
+components = {i+1:list() for i in range(N)}
 
 for _ in range(M):
     u, v = map(int,input().split(' '))
-    link[u] = link.get(u, []) + [v]
-    link[v] = link.get(v, []) + [u]
+    components[u].append(v)
+    components[v].append(u)
 
-answer = 0
-for i in range(1, N+1):
+def dfs(node):
+    visited[node-1] = True
+
+    for c in components[node]:
+        if not visited[c - 1]:
+            dfs(c)
+
+cnt = 0
+for i in range(N):
     if not visited[i]:
-        answer += 1
-        queue = deque([i])
-        visited[i] = True
-
-        while queue:
-            q = queue.popleft()
-
-            for c in link.get(q,[]):
-                if not visited[c]:
-                    visited[c] = True
-                    queue.append(c)
-
-print(answer)
+        cnt += 1
+        dfs(i+1)
+print(cnt)
