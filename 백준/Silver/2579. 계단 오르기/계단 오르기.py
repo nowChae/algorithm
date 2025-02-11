@@ -1,21 +1,20 @@
 import sys
 input = sys.stdin.readline
 
-stairs = int(input())
-points = [0]*stairs
-for i in range(stairs):
-    points[i] = int(input())
+N = int(input())
+stair = []
 
-dp=[0]*(stairs) #인덱스 위치 까지의 최대 점수
+for _ in range(N):
+    stair.append(int(input()))
 
-if len(points) <= 2: #계단이 2개 이하일 경우 모든 점수를 더한 값이 최대 점수
-    print(sum(points))
+dp = [0] * N
 
-else: # 3개 이상
-    dp[0]=points[0] 
-    dp[1]=points[0]+points[1] 
+if N <= 2:
+    print(sum(stair))
+else:
+    dp[0] = stair[0]
+    dp[1] = stair[0] + stair[1]
 
-    for i in range(2,stairs): 
-        dp[i]=max(dp[i-3]+points[i-1]+points[i], dp[i-2]+points[i])
-        
+    for i in range(2, N):
+        dp[i] = max(dp[i-3] + stair[i-1] + stair[i],dp[i-2] + stair[i])
     print(dp[-1])
