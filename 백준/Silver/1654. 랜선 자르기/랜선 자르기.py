@@ -1,18 +1,28 @@
-K, N = map(int, input().split())
+import sys
+input = sys.stdin.readline
 
-cable = [int(input()) for _ in range(K)]
+K, N = map(int,input().split(' '))
+lines = []
+for _ in range(K):
+    lines.append(int(input()))
 
-start = 1
-end = sum(cable) // N
+left = 1
+right = 2**31 - 1
 
-while start <= end:
-    mid = (start + end) // 2
-    count = 0
-    for c in cable:
-        count += c // mid
-    if count >= N:
-        start = mid + 1
+cnt = 0
+
+
+while left <= right:
+    middle = (left + right) // 2
+
+    cnt = 0
+
+    for l in lines:
+        cnt += (l//middle)
+    
+    if cnt >= N:
+        left = middle + 1
     else:
-        end = mid - 1
+        right = middle - 1
 
-print(end)
+print(right)
