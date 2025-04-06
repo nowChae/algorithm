@@ -94,11 +94,11 @@ def renewal(wall, r, c):
             new_c = j_end + 1
             new_wall = 5
         if c < 0:
-            new_c = 0
-            new_wall = 3 
-        if c >= M:
             new_c = M - 1
             new_wall = 2
+        if c >= M:
+            new_c = 0
+            new_wall = 3
 
     # 서
     elif wall == 1:
@@ -108,7 +108,7 @@ def renewal(wall, r, c):
             new_wall = 4
         if r >= M:
             new_r = i_start + c
-            new_c = j_start - i
+            new_c = j_start - 1
             new_wall = 5
         if c < 0:
             new_c = M - 1
