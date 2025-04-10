@@ -49,7 +49,7 @@ def spin_180(things, r, c):
 
 def spin_270(things, r, c):
     new_things = [arr[:] for arr in things]
-    new_things[r - 1][c - 1] = things[r + 1][c + 1]
+    new_things[r - 1][c - 1] = things[r - 1][c + 1]
     new_things[r - 1][c] = things[r][c + 1]
     new_things[r - 1][c + 1] = things[r + 1][c + 1]
 
