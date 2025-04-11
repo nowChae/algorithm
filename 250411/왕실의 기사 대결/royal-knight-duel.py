@@ -6,7 +6,7 @@ worriors = [list(map(int, input().split(' '))) for _ in range(N)]
 command = [list(map(int, input().split(' '))) for _ in range(Q)]
 
 damages = [0 for _ in range(len(worriors))]
-
+deleted = set()
 
 # worrior들의 위치 board
 
@@ -93,6 +93,7 @@ def damage(selected, root):
             worriors[s][4] -= cnt
 
             if worriors[s][4] <= 0:
+                deleted.add(s)
                 damages[s] = 0
                 positions = worrior_position(s)
                 for p in positions:
@@ -102,10 +103,11 @@ def damage(selected, root):
 
 # 차례대로 명령 실행
 for c in command:
-    movable_state, selected = movable(c[0] - 1, c[1])
-    if movable_state:
-        worrior_board = move(selected, c[1])
-        damage(selected, c[0] - 1)
-
+    if c[0] - 1 not in deleted:
+        movable_state, selected = movable(c[0] - 1, c[1])
+        if movable_state:
+            worrior_board = move(selected, c[1])
+            damage(selected, c[0] - 1)
+    
 print(sum(damages))
 
