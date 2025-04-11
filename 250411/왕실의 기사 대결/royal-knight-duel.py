@@ -13,9 +13,10 @@ damages = [0 for _ in range(len(worriors))]
 def replace_worrior():
     w_board = [[0] * L for _ in range(L)]
     for k, w in enumerate(worriors):
-        for i in range(w[0], w[0] + w[2]):
-            for j in range(w[1], w[1] + w[3]):
-                w_board[i - 1][j - 1] = k + 1
+        if worriors[k][4] > 0: 
+            for i in range(w[0], w[0] + w[2]):
+                for j in range(w[1], w[1] + w[3]):
+                    w_board[i - 1][j - 1] = k + 1
     return w_board
 
 
