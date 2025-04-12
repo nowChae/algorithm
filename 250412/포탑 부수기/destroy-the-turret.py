@@ -26,10 +26,19 @@ def weak_top():
     global time, alive_turrets
     
     # 살아있는 포탑만 정렬
-    weak_turrets = [(board[r][c], attack_time[r][c], r+c, c, r, c) for r, c in alive_turrets if board[r][c] > 0]
+    # 정렬 조건: 
+    # 1. 공격력 오름차순
+    # 2. 최근 공격 시간 내림차순
+    # 3. 행+열 내림차순
+    # 4. 열 내림차순
+    weak_turrets = []
+    for r, c in alive_turrets:
+        if board[r][c] > 0:
+            # 튜플 순서 유지: (공격력, 공격 시간, 행+열, 열, 행, 열)
+            weak_turrets.append((board[r][c], attack_time[r][c], r+c, c, r, c))
     
-    # 정렬 조건: 공격력 오름차순, 최근 공격 시간 내림차순, 행+열 내림차순, 열 내림차순
-    weak_turrets.sort(key=lambda x: (x[0], -x[1], -x[2], -x[3]))
+    # 정확한 정렬 기준 적용
+    weak_turrets.sort(key=lambda x: (x[0], -x[1], -(x[2]), -x[3]))
     
     if not weak_turrets:
         return (-1, -1)  # 예외 처리
@@ -103,24 +112,25 @@ def attack_1(start, end, board_path):
     return relation_top
 
 def attack_2(start, end):
-    """포탄 공격 - 방향 배열 활용해 최적화"""
+    """포탄 공격 - 원래 구현 방식 유지"""
     relation_top = {start, end}
-    
+
     attack_value = board[start[0]][start[1]]
     half_value = attack_value // 2
-    
-    # 주변 8방향 + 중앙 공격
-    board[end[0]][end[1]] -= attack_value
-    
-    for dr in [-1, 0, 1]:
-        for dc in [-1, 0, 1]:
-            if dr == 0 and dc == 0:
-                continue
-            r, c = position_change(end[0] + dr, end[1] + dc)
-            if board[r][c] > 0:
+
+    # 중요: 공격자의 공격 시간 업데이트
+    attack_time[start[0]][start[1]] = time
+
+    for i in range(end[0] - 1, end[0] + 2):
+        for j in range(end[1] - 1, end[1] + 2):
+            r, c = position_change(i, j)
+            if board[r][c] != 0:
                 relation_top.add((r, c))
-                board[r][c] -= half_value
-    
+                if r == end[0] and c == end[1]:
+                    board[r][c] -= attack_value
+                else:
+                    board[r][c] -= half_value
+
     return relation_top
 
 def broken_top():
@@ -146,6 +156,17 @@ def align(top_list):
 
 # 메인 로직
 for _ in range(K):
+    # 매 턴마다 살아있는 포탑 목록 갱신
+    alive_turrets = []
+    for i in range(N):
+        for j in range(M):
+            if board[i][j] > 0:
+                alive_turrets.append((i, j))
+                
+    # 살아있는 포탑이 1개 이하라면 종료
+    if len(alive_turrets) <= 1:
+        break
+        
     # 공격자 선정
     start = weak_top()
     if start == (-1, -1):
@@ -164,7 +185,8 @@ for _ in range(K):
         relation_top = attack_2(start, end)
     
     # 포탑 파괴 확인
-    alive_count = broken_top()
+    broken_top()
+    alive_count = sum(1 for i in range(N) for j in range(M) if board[i][j] > 0)
     if alive_count <= 1:
         break
     
