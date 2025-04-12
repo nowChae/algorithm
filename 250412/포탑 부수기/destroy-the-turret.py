@@ -1,204 +1,185 @@
 from collections import deque
-import math
 
 N, M, K = map(int, input().split())
 board = [list(map(int, input().split())) for _ in range(N)]
-attack_time = [[0] * M for _ in range(N)]
+attack_time = [[0] * M for _ in range(N)]  # 공격 시간 기록
 time = 1
 
 # 방향 상수
-dx = [0, 1, 0, -1]
+dx = [0, 1, 0, -1]  # 우, 하, 좌, 상 순서 (BFS 우선순위 방향)
 dy = [1, 0, -1, 0]
+dx2 = [0, 0, 0, -1, -1, -1, 1, 1, 1]  # 포탄 공격 9방향
+dy2 = [0, -1, 1, 0, -1, 1, 0, -1, 1]
 
-# 좌표 변환 함수 (토러스 구조)
-def position_change(r, c):
-    return r % N, c % M
+# 공격 참여 여부 추적
+is_active = [[False] * M for _ in range(N)]
 
-# 살아있는 포탑 목록 관리 (최초 한 번만 전체 순회)
-alive_turrets = []
-for i in range(N):
-    for j in range(M):
-        if board[i][j] > 0:
-            alive_turrets.append((i, j))
+# 포탑 클래스 정의
+class Turret:
+    def __init__(self, x, y, attack_time, power):
+        self.x = x
+        self.y = y
+        self.attack_time = attack_time
+        self.power = power
 
-def weak_top():
-    """가장 약한 포탑 선정 - 리스트 정렬 방식으로 최적화"""
-    global time, alive_turrets
-    
-    # 살아있는 포탑만 정렬
-    # 정렬 조건: 
-    # 1. 공격력 오름차순
-    # 2. 최근 공격 시간 내림차순
-    # 3. 행+열 내림차순
-    # 4. 열 내림차순
-    weak_turrets = []
-    for r, c in alive_turrets:
-        if board[r][c] > 0:
-            # 튜플 순서 유지: (공격력, 공격 시간, 행+열, 열, 행, 열)
-            weak_turrets.append((board[r][c], attack_time[r][c], r+c, c, r, c))
-    
-    # 정확한 정렬 기준 적용
-    weak_turrets.sort(key=lambda x: (x[0], -x[1], -(x[2]), -x[3]))
-    
-    if not weak_turrets:
-        return (-1, -1)  # 예외 처리
-    
-    _, _, _, _, top_r, top_c = weak_turrets[0]
-    board[top_r][top_c] += (N + M)
-    attack_time[top_r][top_c] = time
-    
-    return (top_r, top_c)
+# 턴 초기화 함수
+def init_turn():
+    global time
+    for i in range(N):
+        for j in range(M):
+            is_active[i][j] = False
+    time += 1
 
-def strong_top():
-    """가장 강한 포탑 선정 - 리스트 정렬 방식으로 최적화"""
-    # 살아있는 포탑만 정렬
-    strong_turrets = [(board[r][c], attack_time[r][c], r+c, c, r, c) for r, c in alive_turrets if board[r][c] > 0]
+# 약한 포탑 선정 및 강화
+def awake(live_turrets):
+    # 포탑 정렬: 공격력 오름차순, 공격시간 내림차순, 행+열 내림차순, 열 내림차순
+    live_turrets.sort(key=lambda t: (t.power, -t.attack_time, -(t.x + t.y), -t.y))
     
-    # 정렬 조건: 공격력 내림차순, 최근 공격 시간 오름차순, 행+열 오름차순, 열 오름차순
-    strong_turrets.sort(key=lambda x: (-x[0], x[1], x[2], x[3]))
+    # 가장 약한 포탑 선택 및 강화
+    weak_turret = live_turrets[0]
+    x, y = weak_turret.x, weak_turret.y
     
-    if not strong_turrets:
-        return (-1, -1)  # 예외 처리
+    board[x][y] += (N + M)  # 공격력 증가
+    attack_time[x][y] = time  # 공격 시간 갱신
+    weak_turret.power = board[x][y]  # 객체 정보 갱신
+    weak_turret.attack_time = time
+    is_active[x][y] = True  # 공격 참여 표시
     
-    _, _, _, _, top_r, top_c = strong_turrets[0]
-    return (top_r, top_c)
+    return weak_turret
 
-def can_go(start, end):
-    """BFS 최적화 - 큐 구조 및 방문 체크 개선"""
-    if start == end:
-        return (False, None)  # 시작점과 끝점이 같은 경우 처리
+# 레이저 공격
+def laser_attack(weak_turret, strong_turret):
+    sx, sy = weak_turret.x, weak_turret.y
+    ex, ey = strong_turret.x, strong_turret.y
+    power = weak_turret.power
     
-    board_path = [[(-1, -1)] * M for _ in range(N)]
+    # BFS 경로 탐색을 위한 초기화
     visited = [[False] * M for _ in range(N)]
+    back_x = [[-1] * M for _ in range(N)]
+    back_y = [[-1] * M for _ in range(N)]
     
-    # 큐에 시작 위치와 카운트를 함께 저장
-    queue = deque([(start[0], start[1], 0)])
-    visited[start[0]][start[1]] = True
+    # BFS 시작
+    queue = deque([(sx, sy)])
+    visited[sx][sy] = True
+    can_attack = False
     
     while queue:
-        cur_r, cur_c, cnt = queue.popleft()
+        x, y = queue.popleft()
         
-        if cur_r == end[0] and cur_c == end[1]:
-            return (True, board_path)
-        
-        for i in range(4):
-            new_r, new_c = position_change(cur_r + dx[i], cur_c + dy[i])
-            
-            if board[new_r][new_c] > 0 and not visited[new_r][new_c]:
-                queue.append((new_r, new_c, cnt + 1))
-                visited[new_r][new_c] = True
-                board_path[new_r][new_c] = (cur_r, cur_c)
-    
-    return (False, board_path)
-
-def attack_1(start, end, board_path):
-    """레이저 공격 - 관련된 포탑만 처리하도록 최적화"""
-    relation_top = {start, end}
-    
-    attack_value = board[start[0]][start[1]]
-    half_value = attack_value // 2
-    
-    board[end[0]][end[1]] -= attack_value
-    
-    # 경로 역추적
-    cur_r, cur_c = end
-    while True:
-        cur_r, cur_c = board_path[cur_r][cur_c]
-        if (cur_r, cur_c) == start:
+        if x == ex and y == ey:
+            can_attack = True
             break
-        relation_top.add((cur_r, cur_c))
-        board[cur_r][cur_c] -= half_value
+        
+        # 우, 하, 좌, 상 순서로 탐색 (우선순위 방향)
+        for i in range(4):
+            nx, ny = (x + dx[i]) % N, (y + dy[i]) % M
+            
+            # 이미 방문했거나 부서진 포탑은 건너뜀
+            if visited[nx][ny] or board[nx][ny] == 0:
+                continue
+            
+            visited[nx][ny] = True
+            back_x[nx][ny] = x
+            back_y[nx][ny] = y
+            queue.append((nx, ny))
     
-    return relation_top
-
-def attack_2(start, end):
-    """포탄 공격 - 원래 구현 방식 유지"""
-    relation_top = {start, end}
-
-    attack_value = board[start[0]][start[1]]
-    half_value = attack_value // 2
-
-    # 중요: 공격자의 공격 시간 업데이트
-    attack_time[start[0]][start[1]] = time
-
-    for i in range(end[0] - 1, end[0] + 2):
-        for j in range(end[1] - 1, end[1] + 2):
-            r, c = position_change(i, j)
-            if board[r][c] != 0:
-                relation_top.add((r, c))
-                if r == end[0] and c == end[1]:
-                    board[r][c] -= attack_value
-                else:
-                    board[r][c] -= half_value
-
-    return relation_top
-
-def broken_top():
-    """부서진 포탑 처리 - 살아있는 포탑 목록 업데이트"""
-    global alive_turrets
+    # 공격 가능한 경우 데미지 적용
+    if can_attack:
+        # 가장 강한 포탑에 공격력만큼 데미지
+        board[ex][ey] -= power
+        if board[ex][ey] < 0:
+            board[ex][ey] = 0
+        is_active[ex][ey] = True
+        
+        # 경로 역추적하여 경로상 포탑에 절반 데미지
+        cx, cy = back_x[ex][ey], back_y[ex][ey]
+        while not (cx == sx and cy == sy):
+            board[cx][cy] -= power // 2
+            if board[cx][cy] < 0:
+                board[cx][cy] = 0
+            is_active[cx][cy] = True
+            
+            nx, ny = back_x[cx][cy], back_y[cx][cy]
+            cx, cy = nx, ny
     
-    # 포탑 목록 갱신
-    new_alive = []
-    for r, c in alive_turrets:
-        if board[r][c] <= 0:
-            board[r][c] = 0
+    return can_attack
+
+# 포탄 공격
+def bomb_attack(weak_turret, strong_turret):
+    sx, sy = weak_turret.x, weak_turret.y
+    ex, ey = strong_turret.x, strong_turret.y
+    power = weak_turret.power
+    
+    # 타겟 포탑과 주변 8개 방향 포탑 공격
+    for i in range(9):
+        nx, ny = (ex + dx2[i]) % N, (ey + dy2[i]) % M
+        
+        # 공격자 자신은 공격하지 않음
+        if nx == sx and ny == sy:
+            continue
+        
+        # 이미 부서진 포탑은 건너뜀
+        if board[nx][ny] == 0:
+            continue
+        
+        # 타겟 포탑은 공격력 전체, 나머지는 절반 데미지
+        if nx == ex and ny == ey:
+            board[nx][ny] -= power
         else:
-            new_alive.append((r, c))
-    
-    alive_turrets = new_alive
-    return len(alive_turrets)
+            board[nx][ny] -= power // 2
+            
+        # 포탑 파괴 확인
+        if board[nx][ny] < 0:
+            board[nx][ny] = 0
+            
+        # 공격 참여 표시
+        is_active[nx][ny] = True
 
-def align(top_list):
-    """포탑 정비 - 살아있는 포탑만 처리하도록 최적화"""
-    for r, c in alive_turrets:
-        if board[r][c] > 0 and (r, c) not in top_list:
-            board[r][c] += 1
+# 포탑 정비
+def repair():
+    for i in range(N):
+        for j in range(M):
+            # 공격에 참여하지 않은 살아있는 포탑은 공격력 +1
+            if not is_active[i][j] and board[i][j] > 0:
+                board[i][j] += 1
 
 # 메인 로직
 for _ in range(K):
-    # 매 턴마다 살아있는 포탑 목록 갱신
-    alive_turrets = []
+    # 살아있는 포탑 목록 갱신
+    live_turrets = []
     for i in range(N):
         for j in range(M):
             if board[i][j] > 0:
-                alive_turrets.append((i, j))
-                
-    # 살아있는 포탑이 1개 이하라면 종료
-    if len(alive_turrets) <= 1:
-        break
-        
-    # 공격자 선정
-    start = weak_top()
-    if start == (-1, -1):
+                live_turrets.append(Turret(i, j, attack_time[i][j], board[i][j]))
+    
+    # 포탑이 1개 이하면 종료
+    if len(live_turrets) <= 1:
         break
     
-    # 타겟 선정
-    end = strong_top()
-    if end == (-1, -1) or start == end:
-        break
+    # 턴 초기화
+    init_turn()
     
-    # 공격 유형 선택
-    state, board_path = can_go(start, end)
-    if state:
-        relation_top = attack_1(start, end, board_path)
-    else:
-        relation_top = attack_2(start, end)
+    # 약한 포탑 강화
+    weak_turret = awake(live_turrets)
     
-    # 포탑 파괴 확인
-    broken_top()
-    alive_count = sum(1 for i in range(N) for j in range(M) if board[i][j] > 0)
-    if alive_count <= 1:
-        break
+    # 가장 강한 포탑 선택 (power 내림차순, attack_time 오름차순, 행+열 오름차순, 열 오름차순)
+    live_turrets.sort(key=lambda t: (-t.power, t.attack_time, t.x + t.y, t.y))
+    strong_turret = live_turrets[0]
+    
+    # 레이저 공격 시도
+    is_success = laser_attack(weak_turret, strong_turret)
+    
+    # 레이저 공격 실패 시 포탄 공격
+    if not is_success:
+        bomb_attack(weak_turret, strong_turret)
     
     # 포탑 정비
-    align(relation_top)
-    
-    # 시간 증가
-    time += 1
+    repair()
 
-# 결과 출력
-result = strong_top()
-if result == (-1, -1):
-    print(0)
-else:
-    print(board[result[0]][result[1]])
+# 가장 강한 포탑의 공격력 출력
+max_power = 0
+for i in range(N):
+    for j in range(M):
+        max_power = max(max_power, board[i][j])
+
+print(max_power)
