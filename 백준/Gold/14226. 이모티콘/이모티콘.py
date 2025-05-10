@@ -1,35 +1,34 @@
 import sys
+input = sys.stdin.readline
 from collections import deque
 
-input = sys.stdin.readline
 
-S = int(input()) # 만들고 싶은 수
+S = int(input())
 
-# visited 배열을 올바르게 초기화
-visited = [[False] * 1001 for _ in range(1001)]
+visited = [[False] * (S + 1) for _ in range(S + 1)]
+visited[1][0] = True
 
-def bfs():
-    queue = deque([(1, 0, 0)])  # (monitor, board, time)
 
-    while queue:
-        m, b, t = queue.popleft()
+queue = deque([(1, 0, 0)])
+while queue:
+    screen, clip, time = queue.popleft()
 
-        if m == S:
-            return t
-        elif m < S:
-            # Case 1: Paste from board to monitor
-            if m + b < 1001 and not visited[m + b][b]:
-                visited[m + b][b] = True
-                queue.append((m + b, b, t + 1))
-            # Case 2: Copy all from monitor to board
-            if b < m and not visited[m][m]:
-                visited[m][m] = True
-                queue.append((m, m, t + 1))
-        # Case 3: Delete one from monitor
-        if m - 1 > 0 and not visited[m - 1][b]:
-            visited[m - 1][b] = True
-            queue.append((m - 1, b, t + 1))
+    if screen == S:
+        print(time)
+        break
 
-    return -1  # If no valid sequence found
+    if screen < S:
+        
+        if screen != clip and not visited[screen][screen]:
+            visited[screen][screen] = True  
+            queue.append((screen, screen, time + 1))
+        
+        if clip !=0 and screen + clip <= S and not visited[screen + clip][clip]:
+            visited[screen + clip][clip] = True 
+            queue.append((screen + clip, clip, time + 1))
+    
+    if screen > 0 and not visited[screen - 1][clip]:
+        visited[screen - 1][clip] = True    
+        queue.append((screen - 1, clip, time + 1))  
 
-print(bfs())
+
